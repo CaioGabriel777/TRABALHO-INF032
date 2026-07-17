@@ -1,0 +1,4 @@
+relatorios/*
+!relatorios/.gitkeep
+__pycache__/
+*.pyc

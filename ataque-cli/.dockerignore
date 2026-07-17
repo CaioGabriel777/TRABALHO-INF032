@@ -1,0 +1,4 @@
+relatorios
+__pycache__
+*.pyc
+.venv

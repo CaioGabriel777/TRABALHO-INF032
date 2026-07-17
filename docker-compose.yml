@@ -1,0 +1,110 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: lab-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: labdefesa
+      POSTGRES_USER: labdefesa
+      POSTGRES_PASSWORD: labdefesa
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U labdefesa -d labdefesa"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks:
+      - lab-net
+
+  defesa-api:
+    build:
+      context: ./defesa-api
+    container_name: defesa-api
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DB_HOST: postgres
+      DB_PORT: 5432
+      DB_NAME: labdefesa
+      DB_USER: labdefesa
+      DB_PASSWORD: labdefesa
+      RATE_LIMIT_ENABLED: "true"
+      RATE_LIMIT_MAX_ATTEMPTS: 5
+      RATE_LIMIT_WINDOW_SECONDS: 60
+    ports:
+      - "8080:8080"
+    networks:
+      - lab-net
+
+  defesa-web:
+    build:
+      context: ./defesa-web
+      args:
+        NEXT_PUBLIC_API_URL: http://localhost:8080
+    container_name: defesa-web
+    restart: unless-stopped
+    depends_on:
+      - defesa-api
+    ports:
+      - "3000:3000"
+    networks:
+      - lab-net
+
+  ataque-cli:
+    build:
+      context: ./ataque-cli
+    container_name: ataque-cli
+    # nao sobe com "docker compose up" normal; roda sob demanda:
+    #   docker compose --profile ataque run --rm ataque-cli [--usuario X --modo comparar ...]
+    profiles:
+      - ataque
+    depends_on:
+      - defesa-api
+    environment:
+      TARGET_API_URL: http://defesa-api:8080
+    volumes:
+      - ./ataque-cli/relatorios:/app/relatorios
+    networks:
+      - lab-net
+
+  ataque-api:
+    build:
+      context: ./ataque-cli
+    container_name: ataque-api
+    restart: unless-stopped
+    entrypoint: ["python", "servidor.py"]
+    depends_on:
+      - defesa-api
+    environment:
+      TARGET_API_URL: http://defesa-api:8080
+    ports:
+      - "9000:9000"
+    networks:
+      - lab-net
+
+  ataque-web:
+    build:
+      context: ./ataque-web
+      args:
+        NEXT_PUBLIC_ATTACK_API_URL: http://localhost:9000
+    container_name: ataque-web
+    restart: unless-stopped
+    depends_on:
+      - ataque-api
+    ports:
+      - "3001:3000"
+    networks:
+      - lab-net
+
+networks:
+  lab-net:
+    driver: bridge
+
+volumes:
+  postgres-data:

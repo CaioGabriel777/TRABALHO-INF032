@@ -1,0 +1,27 @@
+# Wordlist educacional de senhas fracas/comuns, uma por linha.
+# Linhas em branco e comentarios (#) sao ignorados.
+#
+# O usuario seed "joao.silva" (ver db/init.sql) tem a senha "123456", que
+# aparece na posicao 12 desta lista de proposito: sem defesa, o ataque
+# encontra a senha em 12 tentativas; com o rate limiting padrao (bloqueio
+# apos 5 falhas), o ataque e bloqueado antes de chegar la.
+12345
+123123
+qwerty
+letmein
+iloveyou
+abc123
+senha
+111111
+000000
+password1
+admin
+123456
+1234567
+12345678
+monkey
+dragon
+football
+baseball
+trustno1
+welcome

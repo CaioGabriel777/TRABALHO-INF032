@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  background-color: theme("colors.term.bg");
+  color: theme("colors.term.green");
+  font-family: theme("fontFamily.mono");
+}
+
+@keyframes blink {
+  0%, 49% {
+    opacity: 1;
+  }
+  50%, 100% {
+    opacity: 0;
+  }
+}
+
+.cursor-blink {
+  animation: blink 1s step-start infinite;
+}
+
+.terminal-glow {
+  text-shadow: 0 0 6px currentColor;
+}
+
+.scanlines {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    rgba(57, 255, 106, 0.035),
+    rgba(57, 255, 106, 0.035) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+}
